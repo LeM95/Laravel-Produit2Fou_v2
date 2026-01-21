@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Produits;  // ← Import du Model
-
-use App\Models\Image;  // ← AJOUTEZ CETTE LIGNE
+use App\Models\Produits;
+use App\Models\Image;
+use Illuminate\Support\Facades\Storage;
 
 
 class ProduitsController extends Controller
@@ -23,7 +23,7 @@ class ProduitsController extends Controller
             'nom' => 'required|max:255',
             'description' => 'required|max:1500',
             'prix' => 'required|numeric|min:0',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048', // Validation des images
+            'images.*' => 'nullable|file|max:10240', // Validation des images (10MB max) - accepte tous les formats
 
         ]);
 
@@ -47,35 +47,60 @@ class ProduitsController extends Controller
     }
 
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Produits $produits)
+    public function edit($id)
     {
-        //
+        $produit = Produits::with('images')->findOrFail($id);
+        $produits = Produits::all();
+        return view('parametre', compact('produits', 'produit'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Produits $produits)
+    public function update(Request $request, $id)
     {
-        //
+        $produit = Produits::findOrFail($id);
+
+        $validateddata = $request->validate([
+            'nom' => 'required|max:255',
+            'description' => 'required|max:1500',
+            'prix' => 'required|numeric|min:0',
+            'images.*' => 'nullable|file|max:10240',
+        ]);
+
+        $produit->update($validateddata);
+
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $index => $image) {
+                $path = $image->store('products', 'public');
+                Image::create([
+                    'produit_id' => $produit->id,
+                    'chemin_image' => $path,
+                    'ordre' => $produit->images->count() + $index,
+                ]);
+            }
+        }
+
+        return redirect('/30032006')->with('success', 'Produit mis à jour!');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Produits $produits)
+    public function destroy($id)
     {
-        //
+        $produit = Produits::findOrFail($id);
+
+        foreach ($produit->images as $image) {
+            Storage::disk('public')->delete($image->chemin_image);
+            $image->delete();
+        }
+
+        $produit->delete();
+
+        return redirect('/30032006')->with('success', 'Produit supprimé!');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Produits $produits)
+    public function deleteImage($id)
     {
-        //
+        $image = Image::findOrFail($id);
+        Storage::disk('public')->delete($image->chemin_image);
+        $image->delete();
+
+        return back()->with('success', 'Image supprimée!');
     }
 }
