@@ -415,6 +415,18 @@
             padding: 60px 20px;
             color: #999;
         }
+
+        .badge-notif {
+            background: #dc3545;
+            color: white;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 50px;
+            margin-left: auto;
+            min-width: 22px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -437,6 +449,20 @@
                 <div class="menu-item" onclick="showSection('services')">
                     <span class="menu-icon">🎬</span>
                     <span class="menu-text">Services</span>
+                </div>
+                <div class="menu-item" onclick="window.location.href='{{ route('admin.messages.index') }}'">
+                    <span class="menu-icon">💬</span>
+                    <span class="menu-text">Messagerie</span>
+                    @php
+                        try {
+                            $unreadMessages = \App\Models\Message::where('lu', false)->count();
+                        } catch (\Exception $e) {
+                            $unreadMessages = 0;
+                        }
+                    @endphp
+                    @if($unreadMessages > 0)
+                        <span class="badge-notif">{{ $unreadMessages }}</span>
+                    @endif
                 </div>
                 <div class="menu-item" onclick="showSection('contact')">
                     <span class="menu-icon">📞</span>

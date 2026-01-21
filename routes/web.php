@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProduitsController;
 use App\Http\Controllers\PublicController;
 use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\MessageController;
 use Illuminate\Support\Facades\Route;
 
 // Routes publiques
@@ -12,6 +13,7 @@ Route::get('/produits', [PublicController::class, 'produits'])->name('produits')
 Route::get('/produit/{id}', [PublicController::class, 'produitDetail'])->name('produit.detail');
 Route::get('/services', [PublicController::class, 'services'])->name('services');
 Route::get('/contact', [PublicController::class, 'contact'])->name('contact');
+Route::post('/contact', [MessageController::class, 'store'])->name('contact.store');
 
 // Route admin secrète pour les produits
 Route::get('/30032006', [ProduitsController::class, 'index'])->name('admin.produits');
@@ -32,6 +34,14 @@ Route::prefix('30032006/services')->name('services.')->group(function () {
     Route::post('/{id}/videos', [ServiceController::class, 'storeVideo'])->name('videos.store');
     Route::delete('/videos/{id}', [ServiceController::class, 'destroyVideo'])->name('videos.destroy');
 });
+
+// Routes admin pour les messages
+Route::prefix('30032006/messagerie')->name('admin.messages.')->group(function () {
+    Route::get('/', [MessageController::class, 'index'])->name('index');
+    Route::get('/{id}', [MessageController::class, 'show'])->name('show');
+    Route::delete('/{id}', [MessageController::class, 'destroy'])->name('destroy');
+});
+Route::get('/api/messages/unread-count', [MessageController::class, 'unreadCount'])->name('api.messages.unread');
 
 Route::get('/dashboard', function () {
     return view('dashboard');

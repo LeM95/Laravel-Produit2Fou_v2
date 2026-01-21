@@ -503,8 +503,13 @@
 
         <!-- Contact Form -->
         <div class="contact-form">
+            @if(session('success'))
+                <div style="background: rgba(76, 175, 80, 0.3); backdrop-filter: blur(10px); border: 1px solid rgba(76, 175, 80, 0.5); border-radius: 12px; padding: 15px; margin-bottom: 20px; text-align: center;">
+                    {{ session('success') }}
+                </div>
+            @endif
             <h3 class="form-title">Envoyez-nous un message</h3>
-            <form action="#" method="POST">
+            <form action="{{ route('contact.store') }}" method="POST">
                 @csrf
                 <div class="form-group">
                     <label class="form-label">Nom complet</label>
