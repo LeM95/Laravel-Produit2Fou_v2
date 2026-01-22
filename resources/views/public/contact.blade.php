@@ -398,7 +398,7 @@
 <body>
     <!-- Video Background -->
     <div class="video-background">
-        <video autoplay muted loop playsinline>
+        <video autoplay muted loop playsinline preload="metadata">
             <source src="{{ asset('img/back.mp4') }}" type="video/mp4">
         </video>
         <div class="video-overlay"></div>

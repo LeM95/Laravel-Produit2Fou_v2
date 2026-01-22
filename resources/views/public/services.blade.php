@@ -261,11 +261,12 @@
                     <video
                         id="video-{{ $index }}"
                         class="video-player"
-                        src="{{ asset('storage/' . $item['video']->chemin_video) }}"
+                        data-src="{{ asset('storage/' . $item['video']->chemin_video) }}"
+                        {{ $index === 0 ? 'src=' . asset('storage/' . $item['video']->chemin_video) : '' }}
                         loop
                         playsinline
-                        {{ $index === 0 ? 'autoplay' : '' }}
-                        muted="{{ $index === 0 ? 'true' : 'false' }}"
+                        preload="{{ $index === 0 ? 'auto' : 'none' }}"
+                        {{ $index === 0 ? 'autoplay muted' : '' }}
                         poster="{{ $item['video']->thumbnail ? asset('storage/' . $item['video']->thumbnail) : '' }}"
                     ></video>
 
@@ -352,6 +353,11 @@
 
                 if (isInView && currentVideoIndex !== index) {
                     currentVideoIndex = index;
+
+                    // Lazy load video source if not loaded
+                    if (!video.src && video.dataset.src) {
+                        video.src = video.dataset.src;
+                    }
 
                     // Pause all other videos
                     for (let i = 0; i < totalVideos; i++) {
