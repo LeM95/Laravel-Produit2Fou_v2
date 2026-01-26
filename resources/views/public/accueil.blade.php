@@ -253,8 +253,7 @@
             <div class="hero-content">
                 <h1>Décoration Murale Élégante</h1>
                 <p style=" font-size: 18px; color: white;padding: 20px;text-align: center;letter-spacing: 1px;font-weight: 600;">Découvrez nos produits haut de gamme et notre service d'installation professionnelle.</p>
-                <a href="{{ route('contact') }}" class="contact-btn">Nous Contacter</a>
-                <div class="phone"> 06 29 72 64 98</div>
+                <a href="#" class="contact-btn" id="contactBtn">Nous Contacter</a>
             </div>
         </div>
  
@@ -270,7 +269,29 @@
             </a>
         </div>
     </div>
-
+    <!-- Popup de contact -->
+    <div id="contactPopup" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000; justify-content: center; align-items: center;">
+        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(8px);" id="popupOverlay"></div>
+        <div style="position: relative; background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); border-radius: 25px; padding: 40px; max-width: 500px; width: 90%; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.2);">
+            <h2 style="color: white; text-align: center; margin-bottom: 30px; font-size: 24px;">Que souhaitez-vous ?</h2>
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                <a href="tel:+33629726498" style="display: block; background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px); color: white; text-decoration: none; padding: 20px; border-radius: 15px; text-align: center; font-size: 18px; font-weight: 600; border: 1px solid rgba(255, 255, 255, 0.3); transition: all 0.3s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'">
+                    <i class="fa-solid fa-tag" style="margin-right: 10px;"></i>
+                    Acheter le matériel
+                    <div style="font-size: 14px; margin-top: 8px; opacity: 0.9;">06 29 72 64 98</div>
+                </a>
+                <a href="tel:+33767301511" style="display: block; background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px); color: white; text-decoration: none; padding: 20px; border-radius: 15px; text-align: center; font-size: 18px; font-weight: 600; border: 1px solid rgba(255, 255, 255, 0.3); transition: all 0.3s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'">
+                    <i class="fa-solid fa-paint-roller" style="margin-right: 10px;"></i>
+                    Réalisation d'une décoration murale
+                    <div style="font-size: 14px; margin-top: 8px; opacity: 0.9;">07 67 30 15 11</div>
+                </a>
+            </div>
+            <button id="closePopup" style="position: absolute; top: 15px; right: 15px; background: rgba(255, 255, 255, 0.2); border: none; color: white; font-size: 24px; cursor: pointer; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'">&times;</button>
+        </div>
+    </div>
+    <div class="buton"><div class="content" id="produitss"><i class="fa-solid fa-tag fa-xl"  style="color: #ffffff;"></i><h3>Nos Produits</h1></div>
+    <div class="content" id="Service"><i class="fa-solid fa-paint-roller fa-xl" style="color: #ffffff;"></i> <h3>Nos Service</h1></div></div>
+    
     <!-- Bottom Navigation -->
     <nav class="bottom-nav">
         <a href="{{ route('accueil') }}" class="nav-item active">
@@ -290,5 +311,35 @@
             <span>Contact</span>
         </a>
     </nav>
+    <script>
+        const contactBtn = document.getElementById('contactBtn')
+        const contactPopup = document.getElementById('contactPopup')
+        const closePopup = document.getElementById('closePopup')
+        const popupOverlay = document.getElementById('popupOverlay')
+
+
+        // Ouvrir la popup
+        contactBtn.addEventListener('click', () => {
+            contactPopup.style.display = 'flex';
+        })
+
+        // Fermer la popup avec le bouton X
+        closePopup.addEventListener('click', () => {
+            contactPopup.style.display = 'none';
+        })
+
+        // Fermer la popup en cliquant sur l'overlay
+        popupOverlay.addEventListener('click', () => {
+            contactPopup.style.display = 'none';
+        })
+
+        // Fermer la popup avec la touche Échap
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && contactPopup.style.display === 'flex') {
+                contactPopup.style.display = 'none';
+            }
+        })
+        
+    </script>
 </body>
 </html>

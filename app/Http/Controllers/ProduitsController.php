@@ -12,7 +12,12 @@ class ProduitsController extends Controller
 {
     public function index()
     {
-        $produits =  Produits::all();
+        try {
+            $produits = Produits::orderBy('ordre', 'asc')->orderBy('id', 'desc')->get();
+        } catch (\Exception $e) {
+            // Si la colonne ordre n'existe pas, on trie par id
+            $produits = Produits::orderBy('id', 'desc')->get();
+        }
         return view('parametre', compact('produits'));
     }
 
@@ -101,6 +106,62 @@ class ProduitsController extends Controller
         Storage::disk('public')->delete($image->chemin_image);
         $image->delete();
 
+        // Return JSON for AJAX requests
+        if (request()->ajax() || request()->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
+
         return back()->with('success', 'Image supprimée!');
+    }
+
+    public function updateOrdre(Request $request)
+    {
+        try {
+            // Get produits - could be JSON string or array
+            $produits = $request->input('produits', []);
+
+            // If it's a JSON string, decode it
+            if (is_string($produits)) {
+                $produits = json_decode($produits, true);
+            }
+
+            if (empty($produits) || !is_array($produits)) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Aucun produit reçu'
+                ], 400);
+            }
+
+            $updated = 0;
+            foreach ($produits as $item) {
+                $id = $item['id'] ?? null;
+                $ordre = $item['ordre'] ?? null;
+
+                if ($id !== null && $ordre !== null) {
+                    Produits::where('id', (int)$id)->update(['ordre' => (int)$ordre]);
+                    $updated++;
+                }
+            }
+
+            return response()->json(['success' => true, 'updated' => $updated]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'error' => 'Exception: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function toggleVisibility($id)
+    {
+        try {
+            $produit = Produits::findOrFail($id);
+            $produit->visible = !$produit->visible;
+            $produit->save();
+
+            return response()->json([
+                'success' => true,
+                'visible' => $produit->visible
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
     }
 }

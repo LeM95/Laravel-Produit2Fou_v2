@@ -109,7 +109,7 @@
 
         .product-image {
             width: 100%;
-            height: 220px;
+            height: 280px;
             object-fit: cover;
             background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%);
         }
@@ -210,7 +210,7 @@
 
         @media (max-width: 768px) {
             .product-image {
-                height: 180px;
+                height: 240px;
             }
 
             .product-info {

@@ -22,6 +22,8 @@ Route::get('/30032006/produit/{id}/edit', [ProduitsController::class, 'edit'])->
 Route::put('/30032006/produit/{id}', [ProduitsController::class, 'update'])->name('admin.produits.update');
 Route::delete('/30032006/produit/{id}', [ProduitsController::class, 'destroy'])->name('admin.produits.destroy');
 Route::delete('/30032006/image/{id}', [ProduitsController::class, 'deleteImage'])->name('admin.image.delete');
+Route::post('/30032006/produits/ordre', [ProduitsController::class, 'updateOrdre'])->name('admin.produits.ordre');
+Route::post('/30032006/produit/{id}/visibility', [ProduitsController::class, 'toggleVisibility'])->name('admin.produits.visibility');
 
 // Routes admin pour les services
 Route::prefix('30032006/services')->name('services.')->group(function () {

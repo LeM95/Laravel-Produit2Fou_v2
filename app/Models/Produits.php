@@ -12,6 +12,8 @@ class Produits extends Model
         'nom',
         'description',
         'prix',
+        'ordre',
+        'visible',
     ];
     // Relation : Un produit a plusieurs images
     public function images()

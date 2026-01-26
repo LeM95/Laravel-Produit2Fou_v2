@@ -17,7 +17,15 @@ class PublicController extends Controller
 
     public function produits()
     {
-        $produits = Produits::with('images')->get();
+        try {
+            $produits = Produits::with('images')
+                ->where('visible', true)
+                ->orderBy('ordre', 'asc')
+                ->orderBy('id', 'desc')
+                ->get();
+        } catch (\Exception $e) {
+            $produits = Produits::with('images')->orderBy('id', 'desc')->get();
+        }
         return view('public.produits', compact('produits'));
     }
 

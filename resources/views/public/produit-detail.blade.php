@@ -90,7 +90,7 @@
 
         .main-image {
             width: 100%;
-            height: 300px;
+            height: 500px;
             object-fit: cover;
             background: rgba(0, 0, 0, 0.3);
         }

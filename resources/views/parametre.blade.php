@@ -427,6 +427,76 @@
             min-width: 22px;
             text-align: center;
         }
+
+        .ordre-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            z-index: 10;
+        }
+
+        .ordre-btn {
+            width: 28px;
+            height: 28px;
+            background: rgba(102, 126, 234, 0.9);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.2s;
+        }
+
+        .ordre-btn:hover {
+            background: #764ba2;
+        }
+
+        .ordre-num {
+            background: #333;
+            color: white;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .item-card {
+            position: relative;
+        }
+
+        .item-card.hidden-product {
+            opacity: 0.5;
+            filter: grayscale(70%);
+        }
+
+        .visibility-btn {
+            width: 28px;
+            height: 28px;
+            background: rgba(40, 167, 69, 0.9);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+            margin-top: 4px;
+        }
+
+        .visibility-btn:hover {
+            background: #1e7e34;
+        }
+
+        .visibility-btn.hidden {
+            background: rgba(220, 53, 69, 0.9);
+        }
+
+        .visibility-btn.hidden:hover {
+            background: #c82333;
+        }
     </style>
 </head>
 <body>
@@ -518,9 +588,17 @@
                     <button type="submit" class="btn">➕ Ajouter le produit</button>
                 </form>
 
-                <div class="items-grid">
-                    @forelse($produits as $produit)
-                        <div class="item-card">
+                <div class="items-grid" id="produitsGrid">
+                    @forelse($produits as $index => $produit)
+                        <div class="item-card {{ ($produit->visible ?? true) ? '' : 'hidden-product' }}" data-id="{{ $produit->id }}" data-ordre="{{ $produit->ordre ?? 0 }}" data-visible="{{ ($produit->visible ?? true) ? '1' : '0' }}">
+                            <div class="ordre-controls">
+                                <button type="button" class="ordre-btn" onclick="moveProduct({{ $produit->id }}, 'up')" title="Monter">▲</button>
+                                <span class="ordre-num">{{ $index + 1 }}</span>
+                                <button type="button" class="ordre-btn" onclick="moveProduct({{ $produit->id }}, 'down')" title="Descendre">▼</button>
+                                <button type="button" class="visibility-btn {{ ($produit->visible ?? true) ? '' : 'hidden' }}" onclick="toggleVisibility({{ $produit->id }}, this)" title="{{ ($produit->visible ?? true) ? 'Masquer' : 'Afficher' }}">
+                                    {{ ($produit->visible ?? true) ? '👁️' : '🚫' }}
+                                </button>
+                            </div>
                             @if($produit->images->count() > 0)
                                 <img src="{{ asset('storage/' . $produit->images->first()->chemin_image) }}"
                                      alt="{{ $produit->nom }}"
@@ -546,7 +624,12 @@
 
                                 <div class="item-actions" style="margin-top: 15px;">
                                     <button class="btn-small btn-edit"
-                                            onclick='editProduct({{ $produit->id }}, "{{ str_replace('"', '&quot;', $produit->nom) }}", "{{ str_replace('"', '&quot;', $produit->description) }}", {{ $produit->prix }})'>
+                                            data-id="{{ $produit->id }}"
+                                            data-nom="{{ $produit->nom }}"
+                                            data-description="{{ $produit->description }}"
+                                            data-prix="{{ $produit->prix }}"
+                                            data-images="{{ json_encode($produit->images->map(function($img) { return ['id' => $img->id, 'chemin' => asset('storage/' . $img->chemin_image)]; })) }}"
+                                            onclick="editProduct(this)">
                                         ✏️ Modifier
                                     </button>
                                     <form action="{{ route('admin.produits.destroy', $produit->id) }}"
@@ -714,7 +797,13 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Ajouter des photos supplémentaires</label>
+                        <label class="form-label">Photos actuelles</label>
+                        <div id="current_images" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;"></div>
+                        <p style="font-size: 12px; color: #999;">Cliquez sur le X rouge pour supprimer une photo</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Ajouter des photos supplementaires</label>
                         <input type="file" name="images[]" multiple accept="image/*" class="form-input">
                     </div>
                 </div>
@@ -790,12 +879,63 @@
             overlay.classList.toggle('active');
         }
 
-        function editProduct(id, nom, description, prix) {
+        function editProduct(btn) {
+            const id = btn.dataset.id;
+            const nom = btn.dataset.nom;
+            const description = btn.dataset.description;
+            const prix = btn.dataset.prix;
+            let images = [];
+
+            try {
+                images = JSON.parse(btn.dataset.images);
+            } catch(e) {
+                images = [];
+            }
+
             document.getElementById('edit_nom').value = nom;
             document.getElementById('edit_description').value = description;
             document.getElementById('edit_prix').value = prix;
             document.getElementById('editForm').action = '/30032006/produit/' + id;
+
+            // Afficher les images actuelles
+            const imagesContainer = document.getElementById('current_images');
+            imagesContainer.innerHTML = '';
+
+            if (images && images.length > 0) {
+                images.forEach(function(img) {
+                    const imgWrapper = document.createElement('div');
+                    imgWrapper.style.cssText = 'position: relative; display: inline-block;';
+                    imgWrapper.innerHTML = `
+                        <img src="${img.chemin}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 2px solid #e0e0e0;">
+                        <button type="button" onclick="deleteImage(${img.id}, this)" style="position: absolute; top: -8px; right: -8px; width: 24px; height: 24px; background: #dc3545; color: white; border: none; border-radius: 50%; cursor: pointer; font-size: 14px; font-weight: bold;">×</button>
+                    `;
+                    imagesContainer.appendChild(imgWrapper);
+                });
+            } else {
+                imagesContainer.innerHTML = '<p style="color: #999; font-size: 14px;">Aucune photo</p>';
+            }
+
             document.getElementById('editModal').classList.add('active');
+        }
+
+        function deleteImage(imageId, btn) {
+            if (confirm('Supprimer cette photo ?')) {
+                fetch('/30032006/image/' + imageId, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    }
+                }).then(response => {
+                    if (response.ok) {
+                        btn.parentElement.remove();
+                    } else {
+                        alert('Erreur lors de la suppression');
+                    }
+                }).catch(err => {
+                    alert('Erreur: ' + err);
+                });
+            }
         }
 
         function closeEditModal() {
@@ -825,6 +965,114 @@
                 closeEditServiceModal();
             }
         });
+
+        function moveProduct(productId, direction) {
+            const grid = document.getElementById('produitsGrid');
+            const cards = Array.from(grid.querySelectorAll('.item-card[data-id]'));
+            const currentIndex = cards.findIndex(card => card.dataset.id == productId);
+
+            if (currentIndex === -1) return;
+
+            let newIndex;
+            if (direction === 'up' && currentIndex > 0) {
+                newIndex = currentIndex - 1;
+            } else if (direction === 'down' && currentIndex < cards.length - 1) {
+                newIndex = currentIndex + 1;
+            } else {
+                return;
+            }
+
+            // Swap DOM elements
+            const currentCard = cards[currentIndex];
+            const targetCard = cards[newIndex];
+
+            if (direction === 'up') {
+                grid.insertBefore(currentCard, targetCard);
+            } else {
+                grid.insertBefore(targetCard, currentCard);
+            }
+
+            // Update order numbers and save
+            saveProductOrder();
+        }
+
+        function saveProductOrder() {
+            const grid = document.getElementById('produitsGrid');
+            const cards = Array.from(grid.querySelectorAll('.item-card[data-id]'));
+
+            const produits = cards.map((card, index) => {
+                // Update visual order number
+                const numEl = card.querySelector('.ordre-num');
+                if (numEl) numEl.textContent = index + 1;
+
+                return {
+                    id: parseInt(card.dataset.id),
+                    ordre: index
+                };
+            });
+
+            // Use FormData for better Laravel compatibility
+            const formData = new FormData();
+            formData.append('_token', '{{ csrf_token() }}');
+            formData.append('produits', JSON.stringify(produits));
+
+            fetch('/30032006/produits/ordre', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                },
+                body: formData
+            }).then(response => {
+                return response.json().then(data => {
+                    if (data.success) {
+                        // Show brief success indicator on all buttons
+                        document.querySelectorAll('.ordre-btn').forEach(btn => {
+                            btn.style.background = '#28a745';
+                            setTimeout(() => { btn.style.background = ''; }, 800);
+                        });
+                    } else {
+                        alert('Erreur: ' + (data.error || 'Ordre non sauvegardé'));
+                    }
+                });
+            }).catch(err => {
+                alert('Erreur de connexion: ' + err.message);
+            });
+        }
+
+        function toggleVisibility(productId, btn) {
+            const formData = new FormData();
+            formData.append('_token', '{{ csrf_token() }}');
+
+            fetch('/30032006/produit/' + productId + '/visibility', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                },
+                body: formData
+            }).then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const card = btn.closest('.item-card');
+                    if (data.visible) {
+                        card.classList.remove('hidden-product');
+                        btn.classList.remove('hidden');
+                        btn.innerHTML = '👁️';
+                        btn.title = 'Masquer';
+                    } else {
+                        card.classList.add('hidden-product');
+                        btn.classList.add('hidden');
+                        btn.innerHTML = '🚫';
+                        btn.title = 'Afficher';
+                    }
+                } else {
+                    alert('Erreur: ' + (data.error || 'Erreur de visibilité'));
+                }
+            }).catch(err => {
+                alert('Erreur: ' + err.message);
+            });
+        }
     </script>
 </body>
 </html>
