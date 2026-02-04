@@ -520,6 +520,20 @@
                     <span class="menu-icon">🎬</span>
                     <span class="menu-text">Services</span>
                 </div>
+                <div class="menu-item" onclick="window.location.href='{{ route('admin.inventaire.index') }}'">
+                    <span class="menu-icon">📦</span>
+                    <span class="menu-text">Inventaire</span>
+                    @php
+                        try {
+                            $lowStock = \App\Models\Inventaire::whereRaw('stock <= stock_min')->count();
+                        } catch (\Exception $e) {
+                            $lowStock = 0;
+                        }
+                    @endphp
+                    @if($lowStock > 0)
+                        <span class="badge-notif">{{ $lowStock }}</span>
+                    @endif
+                </div>
                 <div class="menu-item" onclick="window.location.href='{{ route('admin.messages.index') }}'">
                     <span class="menu-icon">💬</span>
                     <span class="menu-text">Messagerie</span>
@@ -537,6 +551,10 @@
                 <div class="menu-item" onclick="showSection('contact')">
                     <span class="menu-icon">📞</span>
                     <span class="menu-text">Contact</span>
+                </div>
+                <div class="menu-item" onclick="window.location.href='{{ route('planning.index') }}'">
+                    <span class="menu-icon">📅</span>
+                    <span class="menu-text">Planning</span>
                 </div>
                 <div class="menu-item" onclick="window.location.href='{{ route('accueil') }}'">
                     <span class="menu-icon">🌐</span>
