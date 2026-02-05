@@ -509,26 +509,52 @@
                 </div>
             @endif
             <h3 class="form-title">Envoyez-nous un message</h3>
-            <form action="{{ route('contact.store') }}" method="POST">
+            @if(session('error'))
+                <div style="background: rgba(220, 53, 69, 0.3); backdrop-filter: blur(10px); border: 1px solid rgba(220, 53, 69, 0.5); border-radius: 12px; padding: 15px; margin-bottom: 20px; text-align: center;">
+                    {{ session('error') }}
+                </div>
+            @endif
+            <form action="{{ route('contact.store') }}" method="POST" id="contactForm">
                 @csrf
+                {{-- Honeypot field - hidden from humans, bots will fill it --}}
+                <div style="position: absolute; left: -9999px; opacity: 0; height: 0; overflow: hidden;">
+                    <label for="website">Website</label>
+                    <input type="text" name="website" id="website" tabindex="-1" autocomplete="off">
+                </div>
+
+                {{-- Timestamp to detect fast submissions --}}
+                <input type="hidden" name="form_time" value="{{ time() }}">
+
                 <div class="form-group">
                     <label class="form-label">Nom complet</label>
-                    <input type="text" name="nom" class="form-input" placeholder="Votre nom" required>
+                    <input type="text" name="nom" class="form-input" placeholder="Votre nom" required value="{{ old('nom') }}">
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Email</label>
-                    <input type="email" name="email" class="form-input" placeholder="votre@email.com" required>
+                    <input type="email" name="email" class="form-input" placeholder="votre@email.com" required value="{{ old('email') }}">
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Téléphone</label>
-                    <input type="tel" name="telephone" class="form-input" placeholder="06 XX XX XX XX">
+                    <input type="tel" name="telephone" class="form-input" placeholder="06 XX XX XX XX" value="{{ old('telephone') }}">
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Message</label>
-                    <textarea name="message" class="form-textarea" placeholder="Votre message..." required></textarea>
+                    <textarea name="message" class="form-textarea" placeholder="Votre message..." required>{{ old('message') }}</textarea>
+                </div>
+
+                {{-- Anti-bot math question --}}
+                @php
+                    $num1 = rand(1, 10);
+                    $num2 = rand(1, 10);
+                    $answer = $num1 + $num2;
+                @endphp
+                <div class="form-group">
+                    <label class="form-label">🔒 Vérification anti-robot : {{ $num1 }} + {{ $num2 }} = ?</label>
+                    <input type="number" name="captcha_answer" class="form-input" placeholder="Votre réponse" required style="max-width: 150px;">
+                    <input type="hidden" name="captcha_expected" value="{{ base64_encode($answer . '_' . time()) }}">
                 </div>
 
                 <button type="submit" class="submit-btn">Envoyer le message</button>

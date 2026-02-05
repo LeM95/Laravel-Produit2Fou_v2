@@ -11,7 +11,8 @@ class Message extends Model
         'email',
         'telephone',
         'message',
-        'lu'
+        'lu',
+        'ip_address'
     ];
 
     protected $casts = [
