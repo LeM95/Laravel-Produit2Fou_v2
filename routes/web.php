@@ -7,6 +7,7 @@ use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\InventaireController;
 use App\Http\Controllers\ReservationController;
+use App\Http\Controllers\PublicReservationController;
 use Illuminate\Support\Facades\Route;
 
 // Routes publiques
@@ -16,6 +17,15 @@ Route::get('/produit/{id}', [PublicController::class, 'produitDetail'])->name('p
 Route::get('/services', [PublicController::class, 'services'])->name('services');
 Route::get('/contact', [PublicController::class, 'contact'])->name('contact');
 Route::post('/contact', [MessageController::class, 'store'])->name('contact.store');
+
+// Routes pour la reservation publique avec paiement Stripe
+Route::get('/reserver', [PublicReservationController::class, 'index'])->name('booking.index');
+Route::get('/reserver/dates', [PublicReservationController::class, 'getReservedDates'])->name('booking.dates');
+Route::get('/reserver/check-date', [PublicReservationController::class, 'checkDate'])->name('booking.check');
+Route::post('/reserver/checkout', [PublicReservationController::class, 'createCheckout'])->name('booking.checkout');
+Route::get('/reserver/success', [PublicReservationController::class, 'success'])->name('booking.success');
+Route::get('/reserver/cancel', [PublicReservationController::class, 'cancel'])->name('booking.cancel');
+Route::post('/stripe/webhook', [PublicReservationController::class, 'webhook'])->name('stripe.webhook');
 
 // Route admin secrète pour les produits
 Route::get('/30032006', [ProduitsController::class, 'index'])->name('admin.produits');
@@ -80,6 +90,11 @@ Route::put('/30032006/reservations/services/{id}', [ReservationController::class
 Route::delete('/30032006/reservations/services/{id}', [ReservationController::class, 'destroyService'])->name('planning.services.destroy');
 Route::post('/30032006/reservations/services/{id}/items', [ReservationController::class, 'addServiceItem'])->name('planning.services.items.store');
 Route::delete('/30032006/reservations/services/items/{id}', [ReservationController::class, 'removeServiceItem'])->name('planning.services.items.destroy');
+
+// Routes pour les dates bloquees
+Route::get('/30032006/reservations/dates-bloquees', [ReservationController::class, 'getDatesBloquees'])->name('planning.dates-bloquees');
+Route::post('/30032006/reservations/dates-bloquees', [ReservationController::class, 'bloquerDate'])->name('planning.dates-bloquees.store');
+Route::delete('/30032006/reservations/dates-bloquees/{id}', [ReservationController::class, 'debloquerDate'])->name('planning.dates-bloquees.destroy');
 
 // Vue publique pour les travailleurs (sans mot de passe)
 Route::get('/reservations', [ReservationController::class, 'publicView'])->name('reservations.public');

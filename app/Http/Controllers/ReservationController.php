@@ -6,6 +6,7 @@ use App\Models\Reservation;
 use App\Models\ReservationService;
 use App\Models\ReservationServiceItem;
 use App\Models\ReservationPhoto;
+use App\Models\DateBloquee;
 use App\Models\Inventaire;
 use App\Models\Produits;
 use Illuminate\Http\Request;
@@ -88,6 +89,7 @@ class ReservationController extends Controller
                 'start' => $r->date_reservation->format('Y-m-d'),
                 'color' => $r->statut_color,
                 'extendedProps' => [
+                    'type' => 'reservation',
                     'statut' => $r->statut,
                     'adresse' => $r->adresse,
                     'telephone' => $r->client_telephone,
@@ -96,7 +98,24 @@ class ReservationController extends Controller
             ];
         });
 
-        return response()->json($events);
+        // Add blocked dates
+        $datesBloquees = DateBloquee::all();
+        $blockedEvents = $datesBloquees->map(function($d) {
+            return [
+                'id' => 'blocked_' . $d->id,
+                'title' => $d->raison ?: 'Bloque',
+                'start' => $d->date->format('Y-m-d'),
+                'backgroundColor' => '#6c757d',
+                'borderColor' => '#6c757d',
+                'extendedProps' => [
+                    'type' => 'blocked',
+                    'blockedId' => $d->id,
+                    'raison' => $d->raison
+                ]
+            ];
+        });
+
+        return response()->json($events->merge($blockedEvents));
     }
 
     // Store new reservation
@@ -404,5 +423,71 @@ class ReservationController extends Controller
             'statut_label' => $reservation->statut_label,
             'statut_color' => $reservation->statut_color
         ]);
+    }
+
+    // ============ DATES BLOQUEES ============
+
+    // Get all blocked dates
+    public function getDatesBloquees()
+    {
+        $dates = DateBloquee::orderBy('date', 'asc')->get();
+
+        return response()->json($dates->map(function($d) {
+            return [
+                'id' => $d->id,
+                'title' => $d->raison ?: 'Indisponible',
+                'start' => $d->date->format('Y-m-d'),
+                'allDay' => true,
+                'backgroundColor' => '#6c757d',
+                'borderColor' => '#6c757d',
+                'classNames' => ['blocked-date'],
+                'extendedProps' => [
+                    'type' => 'blocked',
+                    'raison' => $d->raison
+                ]
+            ];
+        }));
+    }
+
+    // Block a date
+    public function bloquerDate(Request $request)
+    {
+        if (!$this->isAuthenticated()) {
+            return response()->json(['success' => false, 'error' => 'Non authentifie'], 401);
+        }
+
+        $request->validate([
+            'date' => 'required|date',
+        ]);
+
+        // Check if date already blocked
+        $exists = DateBloquee::whereDate('date', $request->date)->exists();
+        if ($exists) {
+            return response()->json(['success' => false, 'error' => 'Cette date est deja bloquee'], 400);
+        }
+
+        $dateBloquee = DateBloquee::create([
+            'date' => $request->date,
+            'raison' => $request->raison ?? null,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'id' => $dateBloquee->id,
+            'message' => 'Date bloquee avec succes'
+        ]);
+    }
+
+    // Unblock a date
+    public function debloquerDate($id)
+    {
+        if (!$this->isAuthenticated()) {
+            return response()->json(['success' => false, 'error' => 'Non authentifie'], 401);
+        }
+
+        $date = DateBloquee::findOrFail($id);
+        $date->delete();
+
+        return response()->json(['success' => true, 'message' => 'Date debloquee']);
     }
 }

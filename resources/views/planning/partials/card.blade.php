@@ -93,7 +93,7 @@
             <a href="tel:{{ $r->client_telephone }}" class="call-btn">📞 Appeler</a>
         @endif
         @if($r->adresse && $r->ville)
-            <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($r->adresse . ', ' . $r->ville) }}" target="_blank" class="maps-btn">🗺️ GPS</a>
+            <a href="https://waze.com/ul?q={{ urlencode($r->adresse . ', ' . $r->ville) }}&navigate=yes" target="_blank" class="maps-btn">🗺️ GPS</a>
         @endif
     </div>
 

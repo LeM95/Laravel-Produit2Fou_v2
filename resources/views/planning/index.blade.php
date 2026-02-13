@@ -741,7 +741,7 @@
                                     <a href="tel:{{ $r->client_telephone }}" class="btn btn-sm btn-success">Appeler</a>
                                 @endif
                                 @if($r->adresse && $r->ville)
-                                    <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($r->adresse . ', ' . $r->ville) }}" target="_blank" class="btn btn-sm btn-secondary">GPS</a>
+                                    <a href="https://waze.com/ul?q={{ urlencode($r->adresse . ', ' . $r->ville) }}&navigate=yes" target="_blank" class="btn btn-sm btn-secondary">GPS</a>
                                 @endif
                             </div>
                         </div>
@@ -1078,6 +1078,15 @@
                 events: '{{ route("planning.events") }}',
                 eventClick: function(info) {
                     const props = info.event.extendedProps;
+
+                    // Check if it's a blocked date
+                    if (props.type === 'blocked') {
+                        if (isAdmin && confirm('Date bloquee: ' + (props.raison || 'Aucune raison') + '\n\nVoulez-vous debloquer cette date?')) {
+                            debloquerDate(props.blockedId, info.event);
+                        }
+                        return;
+                    }
+
                     alert(
                         'Client: ' + info.event.title + '\n' +
                         'Statut: ' + props.statut + '\n' +
@@ -1088,8 +1097,14 @@
                 },
                 dateClick: function(info) {
                     if (isAdmin) {
-                        document.querySelector('#addReservationModal input[name="date_reservation"]').value = info.dateStr;
-                        openModal('addReservationModal');
+                        const action = prompt('Que voulez-vous faire pour le ' + info.dateStr + '?\n\n1 = Ajouter une reservation\n2 = Bloquer cette date');
+                        if (action === '1') {
+                            document.querySelector('#addReservationModal input[name="date_reservation"]').value = info.dateStr;
+                            openModal('addReservationModal');
+                        } else if (action === '2') {
+                            const raison = prompt('Raison du blocage (optionnel):');
+                            bloquerDate(info.dateStr, raison);
+                        }
                     }
                 }
             });
@@ -1142,6 +1157,54 @@
                 verifyPassword();
             }
         });
+
+        // Bloquer une date
+        function bloquerDate(date, raison) {
+            fetch('{{ route("planning.dates-bloquees.store") }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ date: date, raison: raison || null })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Date bloquee avec succes!');
+                    location.reload();
+                } else {
+                    alert('Erreur: ' + (data.error || 'Impossible de bloquer cette date'));
+                }
+            })
+            .catch(() => {
+                alert('Erreur de connexion');
+            });
+        }
+
+        // Debloquer une date
+        function debloquerDate(id, event) {
+            fetch('/30032006/reservations/dates-bloquees/' + id, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Date debloquee!');
+                    event.remove();
+                } else {
+                    alert('Erreur: ' + (data.error || 'Impossible de debloquer'));
+                }
+            })
+            .catch(() => {
+                alert('Erreur de connexion');
+            });
+        }
 
         function filterReservations(filter) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));

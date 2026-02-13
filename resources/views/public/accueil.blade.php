@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Produits2Fou - Décoration Murale Élégante</title>
+    <title>Votre Magasin de decoration Préferer - Décoration Murale Élégante</title>
     <style>
         * {
             margin: 0;
@@ -289,8 +289,7 @@
             <button id="closePopup" style="position: absolute; top: 15px; right: 15px; background: rgba(255, 255, 255, 0.2); border: none; color: white; font-size: 24px; cursor: pointer; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'">&times;</button>
         </div>
     </div>
-    <div class="buton"><div class="content" id="produitss"><i class="fa-solid fa-tag fa-xl"  style="color: #ffffff;"></i><h3>Nos Produits</h1></div>
-    <div class="content" id="Service"><i class="fa-solid fa-paint-roller fa-xl" style="color: #ffffff;"></i> <h3>Nos Service</h1></div></div>
+    
     
     <!-- Bottom Navigation -->
     <nav class="bottom-nav">

@@ -456,7 +456,7 @@
 
                 <div class="action-buttons">
                     <a href="tel:0629726498" class="action-btn action-btn-call">📞 Appeler</a>
-                    <a href="https://maps.google.com/?q=178+allée+du+poirier+saint+jean+95480+Pierrelaye" target="_blank" class="action-btn action-btn-map">🗺️ Itinéraire</a>
+                    <a href="https://waze.com/ul?q=178+allée+du+poirier+saint+jean+95480+Pierrelaye" target="_blank" class="action-btn action-btn-map">🗺️ Itinéraire</a>
                 </div>
             </div>
 
@@ -479,7 +479,7 @@
                     <div class="info-content">
                         <div class="info-label">Téléphone</div>
                         <div class="info-value">
-                            <a href="tel:0984181142">09 84 18 11 42</a>
+                            <a href="tel:0767597060">07 67 59 70 60</a>
                         </div>
                     </div>
                 </div>
@@ -489,14 +489,14 @@
                     <div class="info-content">
                         <div class="info-label">Horaires</div>
                         <div class="info-value">
-                            Lun-Dim: 10h-18h
+                            Lun-Sam: 10h-18h
                         </div>
                     </div>
                 </div>
 
                 <div class="action-buttons">
-                    <a href="tel:0984181142" class="action-btn action-btn-call">📞 Appeler</a>
-                    <a href="https://maps.google.com/?q=Rue+des+Forgerons+13150+Tarascon" target="_blank" class="action-btn action-btn-map">🗺️ Itinéraire</a>
+                    <a href="tel:0767597060" class="action-btn action-btn-call">📞 Appeler</a>
+                    <a href="https://waze.com/ul?q=Rue+des+Forgerons+13150+Tarascon" target="_blank" class="action-btn action-btn-map">🗺️ Itinéraire</a>
                 </div>
             </div>
         </div>
@@ -531,13 +531,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Email</label>
-                    <input type="email" name="email" class="form-input" placeholder="votre@email.com" required value="{{ old('email') }}">
-                </div>
-
-                <div class="form-group">
                     <label class="form-label">Téléphone</label>
-                    <input type="tel" name="telephone" class="form-input" placeholder="06 XX XX XX XX" value="{{ old('telephone') }}">
+                    <input type="tel" name="telephone" class="form-input" placeholder="06 XX XX XX XX" required value="{{ old('telephone') }}">
                 </div>
 
                 <div class="form-group">

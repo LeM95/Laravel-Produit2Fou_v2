@@ -402,7 +402,9 @@
                                     </div>
                                     <div class="sender-info">
                                         <h4>{{ $message->nom }}</h4>
-                                        <p>{{ $message->email }}</p>
+                                        @if($message->telephone)
+                                            <p>📞 {{ $message->telephone }}</p>
+                                        @endif
                                     </div>
                                 </div>
                                 <div class="message-date">

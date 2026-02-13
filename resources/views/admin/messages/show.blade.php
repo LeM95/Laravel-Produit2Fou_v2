@@ -431,7 +431,6 @@
                         </div>
                         <div class="sender-details">
                             <h2>{{ $message->nom }}</h2>
-                            <p>📧 {{ $message->email }}</p>
                             @if($message->telephone)
                                 <p>📞 {{ $message->telephone }}</p>
                             @endif
@@ -449,9 +448,6 @@
                             📞 Appeler {{ $message->nom }}
                         </a>
                     @endif
-                    <a href="mailto:{{ $message->email }}" class="action-btn btn-email">
-                        ✉️ Envoyer un email
-                    </a>
                     <form action="{{ route('admin.messages.destroy', $message->id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Supprimer ce message ?')">
                         @csrf
                         @method('DELETE')
@@ -467,10 +463,6 @@
                 </div>
 
                 <div class="info-grid">
-                    <div class="info-card">
-                        <h4>Email</h4>
-                        <p><a href="mailto:{{ $message->email }}">{{ $message->email }}</a></p>
-                    </div>
                     @if($message->telephone)
                         <div class="info-card">
                             <h4>Telephone</h4>
